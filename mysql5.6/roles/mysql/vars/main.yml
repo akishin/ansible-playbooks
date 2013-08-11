@@ -1,0 +1,12 @@
+---
+mysql_url: http://ftp.jaist.ac.jp/pub/mysql/Downloads/MySQL-5.6
+mysql_ver: "5.6.12-2"
+mysql_rpms:
+  - MySQL-client-{{ mysql_ver }}.el6.x86_64.rpm
+  - MySQL-shared-compat-{{ mysql_ver }}.el6.x86_64.rpm
+  - MySQL-shared-{{ mysql_ver }}.el6.x86_64.rpm
+  - MySQL-devel-{{ mysql_ver }}.el6.x86_64.rpm
+  - MySQL-server-{{ mysql_ver }}.el6.x86_64.rpm
+rpm_download_dir: /usr/local/src
+mysql_port: 3306
+mysql_root_password: root

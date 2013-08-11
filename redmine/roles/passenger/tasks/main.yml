@@ -1,0 +1,19 @@
+---
+- name: install passenger gem
+  gem: name=passenger state=present version=$passenger_ver
+
+- name: install passenger dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - gcc
+    - gcc-c++
+    - curl-devel
+    - openssl-devel
+    - zlib-devel
+    - httpd-devel
+
+- name: install passenger-install-apache2-module
+  shell: passenger-install-apache2-module --auto creates=/usr/lib/ruby/gems/2.0.0/gems/passenger-${passenger_ver}/buildout/apache2/mod_passenger.so
+
+- name: generate passenger.conf file
+  shell: passenger-install-apache2-module --snippet > /etc/httpd/conf.d/passenger.conf

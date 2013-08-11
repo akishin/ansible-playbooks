@@ -1,0 +1,8 @@
+---
+- name: install httpd
+  action: yum name=$item state=installed
+  with_items:
+    - httpd
+
+- name: start httpd
+  action: service name=httpd state=started enabled=yes

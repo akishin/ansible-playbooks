@@ -1,0 +1,7 @@
+---
+- name: Install Ruby 2.0
+  hosts: app-server
+  user: root
+
+  roles:
+    - ruby

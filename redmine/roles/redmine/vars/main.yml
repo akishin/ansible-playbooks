@@ -1,0 +1,5 @@
+---
+redmine_ver: "2.3.2"
+redmine_archive: http://rubyforge.org/frs/download.php/77023/redmine-{{ redmine_ver }}.tar.gz
+redmine_mysql_password: redmine
+deploy_dir: /var/apps

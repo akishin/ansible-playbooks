@@ -1,0 +1,7 @@
+---
+- name: Install MySQL 5.6
+  hosts: mysql-server
+  user: root
+
+  roles:
+    - mysql

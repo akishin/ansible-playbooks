@@ -1,0 +1,7 @@
+---
+- name: Install Git 1.8
+  hosts: git
+  user: root
+
+  roles:
+    - git

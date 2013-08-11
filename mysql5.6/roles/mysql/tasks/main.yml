@@ -1,0 +1,66 @@
+---
+- name: download mysql rpms
+  get_url: url={{ mysql_url }}/$item dest={{ rpm_download_dir }}/$item
+  with_items: mysql_rpms
+
+- name: install mysql rpms
+  yum: name=$item state=installed
+  with_items:
+    - "{{ rpm_download_dir }}/{{ mysql_rpms[0] }}"
+    - "{{ rpm_download_dir }}/{{ mysql_rpms[1] }}"
+    - "{{ rpm_download_dir }}/{{ mysql_rpms[2] }}"
+    - "{{ rpm_download_dir }}/{{ mysql_rpms[3] }}"
+    - "{{ rpm_download_dir }}/{{ mysql_rpms[4] }}"
+
+- name: install MySQL-python module
+  yum: name=MySQL-python state=installed
+
+- name: start mysql
+  service: name=mysql state=started enabled=true
+
+- name: check if .mysql_secret exists
+  shell: test -e /root/.mysql_secret
+  register: mysql_secret_exists
+  ignore_errors: True
+
+- debug: msg="mysql_secret_exists [{{ mysql_secret_exists.rc }}]"
+
+- name: get mysql initial password
+  shell: cat /root/.mysql_secret | awk '{print $18}'
+  register: mysql_default_password
+  when: mysql_secret_exists.rc == 0
+
+- debug: msg="mysql default root password is [{{ mysql_default_password.stdout }}]"
+
+- name: change mysql root password
+  command: /usr/bin/mysqladmin -u root -p{{ mysql_default_password.stdout }} password "{{ mysql_root_password }}"
+  when: mysql_secret_exists.rc == 0
+
+- name: delete .mysql_secret
+  command: rm /root/.mysql_secret
+  when: mysql_secret_exists.rc == 0
+
+- name: copy .my.cnf file with root password credentials
+  template: src=.my.cnf.j2 dest=/root/.my.cnf owner=root mode=0600
+
+- name: update mysql root password for all root accounts
+  mysql_user: name=root host=$item
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: delete anonymous MySQL server user
+  action: mysql_user user="" state="absent"
+
+- name: remove the MySQL test database
+  action: mysql_db db=test state=absent
+
+- name: create mysql configuration file /usr/my.cnf
+  action: template src=my.cnf.j2 dest=/usr/my.cnf owner=root mode=0600
+  notify: restart mysql
+
+- name: insert iptables rule
+  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ mysql_port }}"
+              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ mysql_port }} -j ACCEPT"
+  notify: restart iptables

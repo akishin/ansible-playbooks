@@ -1,0 +1,48 @@
+---
+- name: create redmine database
+  mysql_db: name=redmine state=present encoding=utf8
+
+- name: create redmine accounts
+  mysql_user: name=redmine host=$item password=${redmine_mysql_password} priv=redmine.*:ALL state=present
+  with_items:
+    - 127.0.0.1
+    - localhost
+
+- name: install redmine dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - libxml2-devel
+    - libxslt-devel
+    - ImageMagick
+    - ImageMagick-devel
+
+- name: download redmine $redmine_ver archive
+  get_url: url=$redmine_archive dest=$download_path/redmine-$redmine_ver.tar.gz
+
+- name: extract redmine archive
+  command: tar xzf redmine-$redmine_ver.tar.gz chdir=$download_path creates=$download_path/redmine-$redmine_ver
+
+- name: create $deploy_dir directory
+  command: mkdir -p $deploy_dir creates=$deploy_dir
+
+- name: move redmine to $deploy_dir/redmine
+  command: mv redmine-$redmine_ver $deploy_dir/redmine chdir=$download_path creates=$deploy_dir/redmine
+
+- name: copy database.yml file
+  template: src=database.yml.j2 dest=$deploy_dir/redmine/config/database.yml
+
+- name: install bundle gems
+  command: bundle install --path=vendor/bundle --quiet chdir=$deploy_dir/redmine
+
+- name: generate secret token
+  command: bundle exec rake generate_secret_token chdir=$deploy_dir/redmine
+
+- name: setup redmine
+  shell: RAILS_ENV=production REDMINE_LANG=ja bundle exec rake db:create db:migrate assets:precompile redmine:load_default_data chdir=$deploy_dir/redmine
+
+- name: change the permissions of $deploy_dir/redmine
+  command: chown -R apache:apache $deploy_dir/redmine
+
+- name: copy redmine.conf file
+  template: src=redmine.conf dest=/etc/httpd/conf.d/redmine.conf
+  notify: restart httpd
