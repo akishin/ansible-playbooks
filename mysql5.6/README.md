@@ -8,7 +8,7 @@ MySQL 5.6 の公式の RPM をインストールする Playbook です。
 
 ## Usage
 
-clone 後、 hosts ファイル内に対象ホストの IP アドレスを記述して以下のように実行します。
+clone 後、 hosts ファイル内に対象ホストのホスト名または IP アドレスを記述して以下のように実行します。
 
     $ ansible-playbook site.yml -i hosts -k
 
