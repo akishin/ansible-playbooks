@@ -1,0 +1,26 @@
+---
+- name: install packages
+  action: yum name=$item state=installed
+  with_items:
+    - gcc
+    - make
+    - openssl-devel
+    - curl-devel
+    - zlib-devel
+    - gettext
+    - perl-ExtUtils-MakeMaker
+
+- name: download git $git_ver archive
+  get_url: url=$git_archive dest=$download_path/$git_ver.tar.gz
+
+- name: extract git archive
+  command: tar xzf $git_ver.tar.gz chdir=$download_path creates=$download_path/git-$git_ver
+
+- name: configure git
+  command: ./configure --prefix=$install_prefix chdir=$download_path/git-$git_ver creates=$install_prefix/bin/git
+
+- name: make git
+  command: make chdir=$download_path/git-$git_ver creates=$install_prefix/bin/git
+
+- name: install git
+  command: paco -D make install chdir=$download_path/git-$git_ver creates=$install_prefix/bin/git

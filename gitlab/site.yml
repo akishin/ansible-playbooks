@@ -1,0 +1,14 @@
+---
+- name: Install GitLab
+  hosts: gitlab-server
+  user: root
+
+  roles:
+    - common
+    - ruby
+    - git
+    - redis
+    - mysql
+    - apache
+    - passenger
+    - gitlab

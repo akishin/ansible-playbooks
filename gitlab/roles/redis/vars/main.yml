@@ -1,0 +1,5 @@
+---
+libunwind: http://dl.fedoraproject.org/pub/epel/6/x86_64/libunwind-1.1-2.el6.x86_64.rpm
+libunwind_devel: http://dl.fedoraproject.org/pub/epel/6/x86_64/libunwind-devel-1.1-2.el6.x86_64.rpm
+gperftools_libs: http://dl.fedoraproject.org/pub/epel/6/x86_64/gperftools-libs-2.0-11.el6.3.x86_64.rpm
+redis: http://rpms.famillecollet.com/enterprise/6/remi/x86_64/redis-2.6.13-1.el6.remi.x86_64.rpm

@@ -1,0 +1,74 @@
+---
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: install GitLab dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - patch
+    - libxml2-devel
+    - libxslt-devel
+    - libicu-devel
+
+- name: create GitLab user
+  user: name=${gitlab_user} comment="GitLab User" state=present
+
+- name: copy .gitconfig file for GitLab user 
+  template: src=.gitconfig dest=/home/${gitlab_user}/.gitconfig owner=${gitlab_user} 
+
+- name: clone gitlab-shell repository
+  git: repo=${gitlab_shell_repo} dest=/home/${gitlab_user}/gitlab-shell
+
+- name: checkout and create branch gitlab-shell v${gitlab_shell_ver}
+  command: git checkout -B ${gitlab_shell_ver} v${gitlab_shell_ver} chdir=/home/${gitlab_user}/gitlab-shell
+
+- name: copy gitlab-shell config.yml file
+  template: src=gitlab-shell-config.yml.j2 dest=/home/${gitlab_user}/gitlab-shell/config.yml owner=git 
+
+- name: install gitlab-shell
+  shell: ./bin/install chdir=/home/${gitlab_user}/gitlab-shell creates=/home/${gitlab_user}/repositories
+
+
+- name: clone gitlab repository
+  git: repo=${gitlab_repo} dest=/home/${gitlab_user}/gitlab
+
+- name: checkout and create branch gitlab v${gitlab_ver}
+  command: git checkout -B ${gitlab_ver} v${gitlab_ver} chdir=/home/${gitlab_user}/gitlab
+
+- name: copy gitlab.yml file
+  template: src=gitlab.yml.j2 dest=/home/${gitlab_user}/gitlab/config/gitlab.yml owner=git 
+
+- name: copy database.yml file
+  template: src=database.yml.j2 dest=/home/${gitlab_user}/gitlab/config/database.yml
+
+- name: create /home/${gitlab_user}/gitlab/tmp/pids dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git
+
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: bundle install GitLab gems
+  command: bundle install --deployment --without development test postgres chdir=/home/${gitlab_user}/gitlab
+
+- name: gitlab setup
+  shell: /usr/bin/yes "yes" | bundle exec rake gitlab:setup RAILS_ENV=production chdir=/home/${gitlab_user}/gitlab
+
+- name: change the permissions of /home/${gitlab_user}
+  command: chown -R ${gitlab_user}:${gitlab_user} /home/${gitlab_user}
+
+- name: download sidekiq init script
+  get_url: url=${sidekiq_init_script} dest=/etc/init.d/sidekiq owner=root mode=0755
+
+- name: start sidekiq service
+  service: name=sidekiq state=started enabled=yes
+
+- name: apache user added to git group
+  command: usermod -G ${gitlab_user} apache
+
+- name: add write permission to git group
+  command: chmod g+rX /home/${gitlab_user}
+  notify: restart httpd
+
+- name: copy gitlab.conf file
+  template: src=gitlab.conf dest=/etc/httpd/conf.d/gitlab.conf
+  notify: restart httpd

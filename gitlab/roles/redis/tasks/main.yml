@@ -1,0 +1,11 @@
+---
+- name: install redis packages
+  action: yum name=$item state=installed
+  with_items:
+    - ${libunwind}
+    - ${libunwind_devel}
+    - ${gperftools_libs}
+    - ${redis}
+
+- name: start redis
+  action: service name=redis state=started enabled=yes

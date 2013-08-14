@@ -1,0 +1,22 @@
+---
+- name: install mysql
+  action: yum name=$item state=installed
+  with_items:
+    - mysql-devel
+    - mysql-server
+    - MySQL-python
+
+- name: copy my.conf file
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+
+- name: start mysql
+  action: service name=mysqld state=started enabled=yes
+
+- name: create gitlabhq_production database
+  mysql_db: name=gitlabhq_production state=present encoding=utf8
+
+- name: create gitlab accounts
+  mysql_user: name=gitlab host=$item password=gitlab priv=gitlabhq_production.*:ALL state=present
+  with_items:
+    - 127.0.0.1
+    - localhost
