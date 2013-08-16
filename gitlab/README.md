@@ -1,6 +1,14 @@
 # GitLab
 
-GitLab 5.4 を Ruby 2.0, MySQL, Apache + Passenger でインストール・動作させる Playbook です。  
+GitLab 5.4 をインストールするための Playbook です。  
+動作環境として以下がインストールされます。  
+
+* Ruby 2.0
+* Git 1.8
+* Redis 2.6
+* MySQL
+* Apache
+* Passenger
 
 以下の環境で確認しています。
 

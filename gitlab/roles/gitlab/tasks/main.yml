@@ -58,9 +58,14 @@
 
 - name: download sidekiq init script
   get_url: url=${sidekiq_init_script} dest=/etc/init.d/sidekiq owner=root mode=0755
+  notify: restart sidekiq
 
 - name: start sidekiq service
   service: name=sidekiq state=started enabled=yes
+  notify: restart sidekiq
+
+- name: start sidekiq service
+  service: name=sidekiq state=started
 
 - name: apache user added to git group
   command: usermod -G ${gitlab_user} apache
@@ -72,3 +77,4 @@
 - name: copy gitlab.conf file
   template: src=gitlab.conf dest=/etc/httpd/conf.d/gitlab.conf
   notify: restart httpd
+
