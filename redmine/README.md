@@ -1,6 +1,12 @@
 # Redmine
 
-Redmine と、動作に必要な Ruby, MySQL, Apache + Passenger をインストール・設定するための Playbook です。  
+Redmine をインストールするための Playbook です。  
+動作環境としては以下をインストールします。  
+
+* Ruby 2.0
+* MySQL
+* Apache
+* Passenger
 
 以下の環境で確認しています。
 

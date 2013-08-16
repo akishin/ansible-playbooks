@@ -9,7 +9,3 @@
 - name: disable selinux
   selinux: state=disabled
 
-- name: insert iptables rule
-  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ httpd_port }}"
-              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ httpd_port }} -j ACCEPT"
-  notify: restart iptables
