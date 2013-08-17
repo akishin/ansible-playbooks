@@ -1,0 +1,32 @@
+---
+- hosts: all
+  user: root
+  vars:
+    gpg_keys:
+      - http://apt.sw.be/RPM-GPG-KEY.dag.txt
+      - http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+      - http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+    repo_rpms:
+      - http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el6.rf.x86_64.rpm
+      - http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+      - http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
+    repo_files:
+      - epel.repo
+      - epel-testing.repo
+      - rpmforge.repo
+      - remi.repo
+  tasks:
+    - name: import gpg-keys
+      command: rpm --import $item
+      with_items: gpg_keys
+      ignore_errors: True
+
+    - name: install repositories
+      yum: name=$item state=installed
+      with_items: repo_rpms
+      ignore_errors: True
+
+    - name: disable repositories by default 
+      command: sed -i "s/^\(enabled *= *\)1$/\10/g" /etc/yum.repos.d/$item
+      with_items: repo_files
+
