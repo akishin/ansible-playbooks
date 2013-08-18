@@ -1,0 +1,39 @@
+---
+- name: remove installed ruby rpms
+  yum: name=$item state=removed
+  with_items:
+    - ruby
+    - ruby-libs
+
+- name: install ruby dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - gcc
+    - make
+    - zlib-devel
+    - openssl-devel
+    - readline-devel
+    - ncurses-devel
+    - gdbm-devel
+    - db4-devel
+    - libffi-devel
+    - tk-devel
+    - ${libyaml-rpm}
+    - ${libyaml-devel-rpm}
+    - ${paco-rpm}
+
+- name: download ruby $ruby_ver archive
+  get_url: url=$ruby_archive dest=$download_path/ruby-$ruby_ver.tar.gz
+
+- name: extract ruby archive
+  command: tar xzf ruby-$ruby_ver.tar.gz chdir=$download_path creates=$download_path/ruby-$ruby_ver
+
+- name: configure ruby
+  command: ./configure --prefix=$install_prefix $configure_options chdir=$download_path/ruby-$ruby_ver creates=$install_prefix/bin/ruby
+
+- name: make ruby
+  command: make chdir=$download_path/ruby-$ruby_ver creates=$install_prefix/bin/ruby
+
+- name: install ruby
+  command: paco -D make install chdir=$download_path/ruby-$ruby_ver creates=$install_prefix/bin/ruby
+

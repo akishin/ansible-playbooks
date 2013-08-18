@@ -1,0 +1,42 @@
+source "https://rubygems.org"
+
+gem "rails", "3.2.9"
+
+gem "exception_notification", '3.0.1'
+
+gem "capistrano"
+gem "open4"
+gem "syntax"
+gem "version_fu", :github => "jmckible/version_fu"
+gem "devise"
+gem "devise-encryptable"
+
+group :development do
+  gem "sqlite3"
+  gem "thin"
+
+  gem "debugger"
+  gem "pry"
+  gem "pry-rails"
+end
+
+group :test do
+  gem "sqlite3"
+  gem "test-unit"
+  gem "mocha", "0.12.7"
+  gem "factory_girl_rails"
+  gem "database_cleaner"
+end
+
+group :production do
+  gem "mysql2"
+  gem "unicorn"
+end
+
+group :assets do
+  gem "jquery-rails"
+  gem 'sass-rails',   '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'uglifier', '>= 1.0.3'
+  gem 'therubyracer', :platforms => :ruby
+end

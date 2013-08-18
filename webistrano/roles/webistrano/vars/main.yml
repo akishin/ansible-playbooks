@@ -1,0 +1,5 @@
+---
+webistrano_mysql_password: webistrano
+webistrano_repo: git://github.com/waka/webistrano.git
+webistrano_branch: "rails3"
+deploy_dir: /var/apps

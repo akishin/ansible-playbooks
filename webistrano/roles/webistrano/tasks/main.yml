@@ -1,0 +1,49 @@
+---
+- name: create webistrano database
+  mysql_db: name=webistrano state=present encoding=utf8
+
+- name: create webistrano accounts
+  mysql_user: name=webistrano host=$item password=${webistrano_mysql_password} priv=webistrano.*:ALL state=present
+  with_items:
+    - 127.0.0.1
+    - localhost
+
+- name: install webistrano dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - git
+    - sqlite-devel
+
+- name: create $deploy_dir directory
+  command: mkdir -p $deploy_dir creates=$deploy_dir
+
+- name: clone waka/webistrano repository
+  git: repo=${webistrano_repo} dest=${deploy_dir}/webistrano
+
+- name: checkout branch webistrano ${webistrano_branch}
+  command: git checkout ${webistrano_branch} chdir=${deploy_dir}/webistrano
+
+- name: copy Gemfile
+  template: src=Gemfile.j2 dest=$deploy_dir/webistrano/Gemfile
+
+- name: copy webistrano_config.rb file
+  template: src=webistrano_config.rb.j2 dest=$deploy_dir/webistrano/config/webistrano_config.rb
+
+- name: copy database.yml file
+  template: src=database.yml.j2 dest=$deploy_dir/webistrano/config/database.yml
+
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: install bundle gems
+  command: bundle install --path=vendor/bundle --quiet chdir=$deploy_dir/webistrano
+
+- name: setup webistrano
+  shell: RAILS_ENV=production bundle exec rake db:setup assets:precompile chdir=$deploy_dir/webistrano
+
+- name: change the permissions of $deploy_dir/webistrano
+  command: chown -R apache:apache $deploy_dir/webistrano
+
+- name: copy webistrano.conf file
+  template: src=webistrano.conf dest=/etc/httpd/conf.d/webistrano.conf
+  notify: restart httpd
