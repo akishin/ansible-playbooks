@@ -36,6 +36,3 @@
 
 - name: install ruby
   command: paco -D make install chdir=$download_path/ruby-$ruby_ver creates=$install_prefix/bin/ruby
-
-- name: install bundler gem
-  gem: name=bundler state=latest

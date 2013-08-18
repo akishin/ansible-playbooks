@@ -31,6 +31,9 @@
 - name: copy database.yml file
   template: src=database.yml.j2 dest=$deploy_dir/redmine/config/database.yml
 
+- name: install bundler gem
+  gem: name=bundler state=latest
+
 - name: install bundle gems
   command: bundle install --path=vendor/bundle --quiet chdir=$deploy_dir/redmine
 

@@ -1,5 +1,13 @@
 require 'spec_helper'
 
+describe package('ruby') do
+  it { should_not be_installed }
+end
+
+describe package('ruby-libs') do
+  it { should_not be_installed }
+end
+
 describe package('gcc') do
   it { should be_installed }
 end
