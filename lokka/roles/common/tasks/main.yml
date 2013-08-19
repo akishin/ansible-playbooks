@@ -1,0 +1,11 @@
+---
+- name: install python-selinux
+  yum: pkg=libselinux-python state=latest
+
+- name: selinux setenforce 0
+  command: setenforce 0
+  ignore_errors: True
+
+- name: disable selinux
+  selinux: state=disabled
+

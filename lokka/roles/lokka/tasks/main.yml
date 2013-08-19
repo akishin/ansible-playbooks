@@ -1,0 +1,50 @@
+---
+- name: create lokka database
+  mysql_db: name=lokka state=present encoding=utf8
+
+- name: create lokka accounts
+  mysql_user: name=${lokka_mysql_user} host=$item password=${lokka_mysql_password} priv=lokka.*:ALL state=present
+  with_items:
+    - 127.0.0.1
+    - localhost
+
+- name: install lokka dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - git
+    - libxml2-devel
+    - libxslt-devel
+
+- name: create $deploy_dir directory
+  command: mkdir -p $deploy_dir creates=$deploy_dir
+
+- name: clone lokka repository
+  git: repo=${lokka_repo} dest=${deploy_dir}/lokka
+
+- name: copy database.default.yml file
+  template: src=database.default.yml.j2 dest=$deploy_dir/lokka/database.default.yml
+
+- name: copy config.ru file
+  template: src=config.ru dest=$deploy_dir/lokka/config.ru
+
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: install bundle gems
+  command: bundle install --without=development:test:postgresql:sqlite --path=vendor/bundle --quiet chdir=$deploy_dir/lokka
+
+- name: setup lokka
+  shell: RACK_ENV=production bundle exec rake db:setup chdir=$deploy_dir/lokka
+  ignore_errors: true
+  register: lokka_setup_result
+
+- name: retry rake db:seed
+  shell: RACK_ENV=production bundle exec rake db:seed chdir=$deploy_dir/lokka
+  when: lokka_setup_result.rc != 0
+
+- name: change the permissions of $deploy_dir/lokka
+  command: chown -R apache:apache $deploy_dir/lokka
+
+- name: copy lokka.conf file
+  template: src=lokka.conf dest=/etc/httpd/conf.d/lokka.conf
+  notify: restart httpd

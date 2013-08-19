@@ -1,0 +1,12 @@
+---
+- name: Install Lokka
+  hosts: lokka-server
+  user: root
+
+  roles:
+    - common
+    - ruby
+    - mysql
+    - apache
+    - passenger
+    - lokka

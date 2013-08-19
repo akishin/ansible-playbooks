@@ -1,0 +1,5 @@
+---
+lokka_mysql_user: lokka
+lokka_mysql_password: lokka
+lokka_repo: git://github.com/lokka/lokka.git
+deploy_dir: /var/apps

@@ -1,0 +1,13 @@
+---
+- name: install httpd
+  action: yum name=$item state=installed
+  with_items:
+    - httpd
+
+- name: start httpd
+  action: service name=httpd state=started enabled=yes
+
+- name: insert iptables rule
+  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ httpd_port }}"
+              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ httpd_port }} -j ACCEPT"
+  notify: restart iptables
