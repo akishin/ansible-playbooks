@@ -1,0 +1,21 @@
+---
+- name: install jenkins dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - java-1.7.0-openjdk
+
+- name: install jenkins gpg key
+  command: rpm --import $jenkins_repo_key
+
+- name: install jenkins yum repository
+  get_url: url=$jenkins_repo dest=/etc/yum.repos.d/jenkins.repo
+
+- name: install jenkins
+  action: yum name=jenkins state=installed
+
+- name: start jenkins
+  service: name=jenkins state=started enabled=yes
+
+- name: copy jenkins.conf file
+  template: src=jenkins.conf dest=/etc/httpd/conf.d/jenkins.conf
+  notify: restart httpd

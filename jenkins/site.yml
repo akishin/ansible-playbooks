@@ -1,0 +1,9 @@
+---
+- name: Install Jenkins
+  hosts: jenkins-server
+  user: root
+
+  roles:
+    - common
+    - apache
+    - jenkins

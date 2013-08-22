@@ -1,0 +1,3 @@
+---
+jenkins_repo: http://pkg.jenkins-ci.org/redhat/jenkins.repo
+jenkins_repo_key: http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key
