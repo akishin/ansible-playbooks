@@ -1,7 +1,7 @@
 ---
 gitlab_shell_ver: "1.7.0"
 gitlab_shell_repo: https://github.com/gitlabhq/gitlab-shell.git
-gitlab_ver: "5.4.0"
+gitlab_ver: "6.0.0"
 gitlab_repo: https://github.com/gitlabhq/gitlabhq.git
 gitlab_user: git
 gitlab_host: ${inventory_hostname}

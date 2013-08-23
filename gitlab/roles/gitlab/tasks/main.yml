@@ -9,6 +9,7 @@
     - libxml2-devel
     - libxslt-devel
     - libicu-devel
+    - python-docutils
 
 - name: create GitLab user
   user: name=${gitlab_user} comment="GitLab User" state=present
@@ -43,6 +44,9 @@
 
 - name: create /home/${gitlab_user}/gitlab/tmp/pids dir
   file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git
+
+- name: create /home/${gitlab_user}/gitlab/public/uploads dir
+  file: dest=/home/${gitlab_user}/gitlab/public/uploads state=directory owner=git
 
 - name: install bundler gem
   gem: name=bundler state=latest
