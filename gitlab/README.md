@@ -1,6 +1,6 @@
 # GitLab
 
-GitLab 5.4 をインストールするための Playbook です。  
+GitLab 6.0.0 をインストールするための Playbook です。  
 動作環境として以下がインストールされます。  
 
 * Ruby 2.0
