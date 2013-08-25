@@ -57,7 +57,7 @@ describe command('cd /home/git/gitlab-shell; /usr/bin/git branch') do
 end
 
 describe command('cd /home/git/gitlab; /usr/bin/git branch') do
-  it { should return_stdout /\* 5\.4\.0/ }
+  it { should return_stdout /\* 6\.0\.0/ }
 end
 
 describe file('/home/git/gitlab/config/gitlab.yml') do
