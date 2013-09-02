@@ -15,4 +15,6 @@ My ansible playbooks.
 
     git clone git://github.com/akishin/ansible-playbooks.git
 
+## License
 
+MIT License
