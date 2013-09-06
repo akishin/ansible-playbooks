@@ -1,0 +1,41 @@
+---
+- hosts: all
+  user: root
+  tasks:
+    - name: install requirements
+      yum: name=$item state=installed
+      with_items: 
+        - gcc
+        - python-devel
+        - python-setuptools
+        - mysql-devel
+
+    - name: install pip
+      easy_install: name=pip
+
+    - name: install virtualenv
+      pip: name=virtualenv
+
+    - name: install mysql-python
+      pip: name=mysql-python virtualenv=/root/python-venv
+
+    - name: virtualenv activate
+      shell: source ~/python-venv/bin/activate
+
+    - name: install mysql-server
+      yum: name=mysql-server state=installed
+
+    - name: start mysql
+      action: service name=mysqld state=started enabled=yes
+
+    - name: set ansible_python_interpreter
+      set_fact: ansible_python_interpreter="/root/python-venv/bin/python"
+    
+    - name: create mysql_python_test database
+      mysql_db: name=mysql_python_test state=present encoding=utf8
+    
+    - name: create mysqlpythontest accounts
+      mysql_user: name=mysqlpythontest host=$item password=mysqlpythontest priv=mysql_python_test.*:ALL state=present
+      with_items:
+        - 127.0.0.1
+        - localhost
