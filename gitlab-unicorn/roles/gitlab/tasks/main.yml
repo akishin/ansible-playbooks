@@ -1,0 +1,107 @@
+---
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: install GitLab dependency packages
+  action: yum name=$item state=installed
+  with_items:
+    - gcc-c++
+    - patch
+    - libxml2-devel
+    - libxslt-devel
+    - libicu-devel
+    - python-docutils
+    - MySQL-python
+
+- name: create GitLab user
+  user: name=${gitlab_user} comment="GitLab User" state=present
+
+- name: copy .gitconfig file for GitLab user 
+  template: src=.gitconfig dest=/home/${gitlab_user}/.gitconfig owner=${gitlab_user} 
+
+- name: clone gitlab-shell repository
+  git: repo=${gitlab_shell_repo} dest=/home/${gitlab_user}/gitlab-shell
+
+- name: checkout and create branch gitlab-shell v${gitlab_shell_ver}
+  command: git checkout -B ${gitlab_shell_ver} v${gitlab_shell_ver} chdir=/home/${gitlab_user}/gitlab-shell
+
+- name: copy gitlab-shell config.yml file
+  template: src=gitlab-shell-config.yml.j2 dest=/home/${gitlab_user}/gitlab-shell/config.yml owner=git 
+
+- name: install gitlab-shell
+  shell: ./bin/install chdir=/home/${gitlab_user}/gitlab-shell creates=/home/${gitlab_user}/repositories
+
+- name: create gitlabhq_production database
+  mysql_db: name=gitlabhq_production state=present encoding=utf8
+
+- name: create database account
+  mysql_user: name=${gitlab_db_user} host=$item password=${gitlab_db_password} priv=gitlabhq_production.*:ALL state=present
+  with_items:
+    - ${gitlab_db_host}
+    - localhost
+
+- name: clone gitlab repository
+  git: repo=${gitlab_repo} dest=/home/${gitlab_user}/gitlab version=${gitlab_ver}
+
+#- name: checkout and create branch gitlab ${gitlab_ver}
+#  command: git checkout -B ${gitlab_ver} ${gitlab_ver} chdir=/home/${gitlab_user}/gitlab
+
+- name: copy gitlab.yml file
+  template: src=gitlab.yml.j2 dest=/home/${gitlab_user}/gitlab/config/gitlab.yml owner=git 
+
+- name: copy database.yml file
+  template: src=database.yml.j2 dest=/home/${gitlab_user}/gitlab/config/database.yml owner=git mode=0660
+
+- name: change permission /home/${gitlab_user}/gitlab/log dir
+  file: dest=/home/${gitlab_user}/gitlab/log state=directory owner=git mode=2700
+
+- name: change permission /home/${gitlab_user}/gitlab/tmp dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp state=directory owner=git mode=0775
+
+- name: create /home/${gitlab_user}/gitlab/tmp/pids dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git mode=0700
+
+- name: create /home/${gitlab_user}/gitlab/tmp/sockets dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git mode=0775
+
+- name: create /home/${gitlab_user}/gitlab/public/uploads dir
+  file: dest=/home/${gitlab_user}/gitlab/public/uploads state=directory owner=git mode=0700
+
+- name: copy unicorn config
+  template: src=unicorn.rb.j2 dest=/home/${gitlab_user}/gitlab/config/unicorn.rb owner=git
+
+- name: copy rack attack config
+  template: src=rack_attack.rb.j2 dest=/home/${gitlab_user}/gitlab/config/initializers/rack_attack.rb owner=git
+
+- name: install bundler gem
+  gem: name=bundler state=latest
+
+- name: bundle install GitLab gems
+  command: bundle install --deployment --without development test postgres aws chdir=/home/${gitlab_user}/gitlab
+
+- name: gitlab setup
+  shell: /usr/bin/yes "yes" | bundle exec rake gitlab:setup RAILS_ENV=production chdir=/home/${gitlab_user}/gitlab
+
+- name: change the permissions of /home/${gitlab_user}
+  command: chown -R ${gitlab_user}:${gitlab_user} /home/${gitlab_user}
+
+- name: download gitlab init script
+  get_url: url=${gitlab_init_script} dest=/etc/init.d/gitlab owner=root mode=0755
+
+- name: copy logrotate config
+  template: src=logrotate.j2 dest=/etc/logrotate.d/gitlab owner=root
+
+- name: start gitlab service
+  service: name=gitlab state=started enabled=yes
+
+- name: nginx user added to git group
+  command: usermod -G ${gitlab_user} nginx
+
+- name: add write permission to git group
+  command: chmod g+x /home/${gitlab_user}
+  notify: restart nginx
+
+- name: copy nginx config
+  template: src=nginx_gitlab.j2 dest=/etc/nginx/conf.d/default.conf owner=root
+  notify: restart nginx
+

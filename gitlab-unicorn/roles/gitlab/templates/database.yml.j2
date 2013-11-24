@@ -1,0 +1,10 @@
+production:
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  database: gitlabhq_production
+  pool: 10
+  username: {{ gitlab_db_user }}
+  password: {{ gitlab_db_password }}
+  host: {{ gitlab_db_host }}
+  # socket: /tmp/mysql.sock

@@ -1,0 +1,8 @@
+---
+libyaml: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-0.1.3-1.el6.x86_64.rpm
+libyaml_devel: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-devel-0.1.3-1.el6.x86_64.rpm
+ruby_ver: "2.0.0-p353"
+ruby_archive: ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-{{ ruby_ver }}.tar.gz
+download_path: /usr/local/src
+install_prefix: /usr
+configure_options: --enable-shared

@@ -1,0 +1,11 @@
+---
+- name: install nginx
+  action: yum name=nginx state=installed
+
+- name: start nginx
+  action: service name=nginx state=started enabled=yes
+
+- name: insert iptables rule
+  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ httpd_port }}"
+              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ httpd_port }} -j ACCEPT"
+  notify: restart iptables

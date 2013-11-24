@@ -1,0 +1,12 @@
+---
+- name: install mysql
+  action: yum name=$item state=installed
+  with_items:
+    - mysql-devel
+    - mysql-server
+
+- name: copy my.conf file
+  template: src=my.cnf.j2 dest=/etc/my.cnf
+
+- name: start mysql
+  action: service name=mysqld state=started enabled=yes
