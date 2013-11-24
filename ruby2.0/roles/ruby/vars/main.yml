@@ -1,4 +1,4 @@
-ruby_ver: "2.0.0-p247"
+ruby_ver: "2.0.0-p353"
 ruby_archive: ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-{{ ruby_ver }}.tar.gz
 download_path: /usr/local/src
 install_prefix: /usr
