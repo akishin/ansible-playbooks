@@ -1,0 +1,5 @@
+---
+git_ver: "1.8.4.4"
+git_archive: http://git-core.googlecode.com/files/git-{{ git_ver }}.tar.gz
+download_path: /usr/local/src
+install_prefix: /usr
