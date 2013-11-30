@@ -1,8 +1,11 @@
 ---
-gitlab_shell_ver: "1.7.0"
+gitlab_shell_ver: "1.7.9"
 gitlab_shell_repo: https://github.com/gitlabhq/gitlab-shell.git
-gitlab_ver: "6.0.0"
+gitlab_ver: "6-3-stable"
 gitlab_repo: https://github.com/gitlabhq/gitlabhq.git
 gitlab_user: git
 gitlab_host: ${inventory_hostname}
-sidekiq_init_script: https://gist.github.com/akishin/6104332/raw/50f19f74e31880b3fd12f06516e94530d3d2d222/sidekiq
+sidekiq_init_script: https://gist.github.com/akishin/6104332/raw/6a36ea237aa676b1e01764198bdff2e0af1e5474/sidekiq
+gitlab_db_user: gitlab
+gitlab_db_password: gitlab
+gitlab_db_host: 127.0.0.1

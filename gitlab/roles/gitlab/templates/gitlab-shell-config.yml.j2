@@ -12,7 +12,9 @@ http_settings:
   self_signed_cert: false
 
 # Repositories path
-# REPOS_PATH MUST NOT BE A SYMLINK!!!
+# Give the canonicalized absolute pathname,
+# REPOS_PATH MUST NOT CONTAIN ANY SYMLINK!!!
+# Check twice that none of the components is a symlink, including "/home".
 repos_path: "/home/{{ gitlab_user }}/repositories"
 
 # File used as authorized_keys for gitlab user
@@ -28,7 +30,7 @@ redis:
 
 # Log file.
 # Default is gitlab-shell.log in the root directory.
-# log_file: "/home/{{ gitlab_user }}/gitlab-shell/gitlab-shell.log"
+# log_file: "/home/git/gitlab-shell/gitlab-shell.log"
 
 # Log level. INFO by default
 log_level: INFO

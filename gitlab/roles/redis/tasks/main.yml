@@ -1,11 +1,19 @@
----
+--- 
+- name: import gpg-keys
+  command: rpm --import $item
+  with_items: gpg_keys
+  ignore_errors: True
+
+- name: install repositories
+  yum: name=$item state=installed
+  with_items: repo_rpms
+  ignore_errors: True
+
 - name: install redis packages
-  action: yum name=$item state=installed
-  with_items:
-    - ${libunwind}
-    - ${libunwind_devel}
-    - ${gperftools_libs}
-    - ${redis}
+  action: yum name=redis state=installed
+
+- name: add a vm.overcommit_memory setting at the end of the sysctl.conf
+  sysctl: name=vm.overcommit_memory value=1 state=present reload=yes
 
 - name: start redis
   action: service name=redis state=started enabled=yes

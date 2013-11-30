@@ -5,11 +5,13 @@
 - name: install GitLab dependency packages
   action: yum name=$item state=installed
   with_items:
+    - gcc-c++
     - patch
     - libxml2-devel
     - libxslt-devel
     - libicu-devel
     - python-docutils
+    - MySQL-python
 
 - name: create GitLab user
   user: name=${gitlab_user} comment="GitLab User" state=present
@@ -29,12 +31,17 @@
 - name: install gitlab-shell
   shell: ./bin/install chdir=/home/${gitlab_user}/gitlab-shell creates=/home/${gitlab_user}/repositories
 
+- name: create gitlabhq_production database
+  mysql_db: name=gitlabhq_production state=present encoding=utf8
+
+- name: create database account
+  mysql_user: name=${gitlab_db_user} host=$item password=${gitlab_db_password} priv=gitlabhq_production.*:ALL state=present
+  with_items:
+    - ${gitlab_db_host}
+    - localhost
 
 - name: clone gitlab repository
-  git: repo=${gitlab_repo} dest=/home/${gitlab_user}/gitlab
-
-- name: checkout and create branch gitlab v${gitlab_ver}
-  command: git checkout -B ${gitlab_ver} v${gitlab_ver} chdir=/home/${gitlab_user}/gitlab
+  git: repo=${gitlab_repo} dest=/home/${gitlab_user}/gitlab version=${gitlab_ver}
 
 - name: copy gitlab.yml file
   template: src=gitlab.yml.j2 dest=/home/${gitlab_user}/gitlab/config/gitlab.yml owner=git 
@@ -42,17 +49,29 @@
 - name: copy database.yml file
   template: src=database.yml.j2 dest=/home/${gitlab_user}/gitlab/config/database.yml
 
+- name: change permission /home/${gitlab_user}/gitlab/log dir
+  file: dest=/home/${gitlab_user}/gitlab/log state=directory owner=git mode=2700
+
+- name: change permission /home/${gitlab_user}/gitlab/tmp dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp state=directory owner=git mode=0775
+
 - name: create /home/${gitlab_user}/gitlab/tmp/pids dir
-  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git
+  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git mode=0700
+
+- name: create /home/${gitlab_user}/gitlab/tmp/sockets dir
+  file: dest=/home/${gitlab_user}/gitlab/tmp/pids state=directory owner=git mode=0775
 
 - name: create /home/${gitlab_user}/gitlab/public/uploads dir
-  file: dest=/home/${gitlab_user}/gitlab/public/uploads state=directory owner=git
+  file: dest=/home/${gitlab_user}/gitlab/public/uploads state=directory owner=git mode=0700
+
+- name: copy rack attack config
+  template: src=rack_attack.rb.j2 dest=/home/${gitlab_user}/gitlab/config/initializers/rack_attack.rb owner=git
 
 - name: install bundler gem
   gem: name=bundler state=latest
 
 - name: bundle install GitLab gems
-  command: bundle install --deployment --without development test postgres chdir=/home/${gitlab_user}/gitlab
+  command: bundle install --deployment --without development test postgres aws chdir=/home/${gitlab_user}/gitlab
 
 - name: gitlab setup
   shell: /usr/bin/yes "yes" | bundle exec rake gitlab:setup RAILS_ENV=production chdir=/home/${gitlab_user}/gitlab
@@ -64,12 +83,12 @@
   get_url: url=${sidekiq_init_script} dest=/etc/init.d/sidekiq owner=root mode=0755
   notify: restart sidekiq
 
+- name: copy logrotate config
+  template: src=logrotate.j2 dest=/etc/logrotate.d/gitlab owner=root
+
 - name: start sidekiq service
   service: name=sidekiq state=started enabled=yes
   notify: restart sidekiq
-
-- name: start sidekiq service
-  service: name=sidekiq state=started
 
 - name: apache user added to git group
   command: usermod -G ${gitlab_user} apache

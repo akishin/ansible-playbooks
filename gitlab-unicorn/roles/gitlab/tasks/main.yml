@@ -43,9 +43,6 @@
 - name: clone gitlab repository
   git: repo=${gitlab_repo} dest=/home/${gitlab_user}/gitlab version=${gitlab_ver}
 
-#- name: checkout and create branch gitlab ${gitlab_ver}
-#  command: git checkout -B ${gitlab_ver} ${gitlab_ver} chdir=/home/${gitlab_user}/gitlab
-
 - name: copy gitlab.yml file
   template: src=gitlab.yml.j2 dest=/home/${gitlab_user}/gitlab/config/gitlab.yml owner=git 
 

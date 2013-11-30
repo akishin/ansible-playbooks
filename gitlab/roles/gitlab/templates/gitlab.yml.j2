@@ -18,13 +18,18 @@ production: &base
     host: {{ gitlab_host }}
     port: 80
     https: false
-    # WARNING: This feature is no longer supported
-    # Uncomment and customize to run in non-root path
-    # Note that ENV['RAILS_RELATIVE_URL_ROOT'] in config/puma.rb may need to be changed
+
+    # Uncomment and customize the last line to run in a non-root path
+    # WARNING: This feature is known to work, but unsupported
+    # Note that three settings need to be changed for this to work.
+    # 1) In your application.rb file: config.relative_url_root = "/gitlab"
+    # 2) In your gitlab.yml file: relative_url_root: /gitlab
+    # 3) In your unicorn.rb: ENV['RAILS_RELATIVE_URL_ROOT'] = "/gitlab"
+    #
     # relative_url_root: /gitlab
 
     # Uncomment and customize if you can't use the default user to run GitLab (default: 'git')
-    # user: git
+    user: {{ gitlab_user }}
 
     ## Email settings
     # Email address used in the "From" field in mails sent by GitLab
@@ -36,11 +41,25 @@ production: &base
     ## User settings
     default_projects_limit: 10
     # default_can_create_group: false  # default: true
-    # default_can_create_team: false   # default: true
     # username_changing_enabled: false # default: true - User can change her username/namespace
+    ## Default theme
+    ##   BASIC  = 1
+    ##   MARS   = 2
+    ##   MODERN = 3
+    ##   GRAY   = 4
+    ##   COLOR  = 5
+    # default_theme: 2 # default: 2
+
 
     ## Users management
-    # signup_enabled: true          # default: false - Account passwords are not sent via the email if signup is enabled.
+    # default: false - Account passwords are not sent via the email if signup is enabled. 
+    # signup_enabled: true
+
+    ## Automatic issue closing
+    # If a commit message matches this regular expression, all issues referenced from the matched text will be closed.
+    # This happens when the commit is pushed or merged into the default branch of a project.
+    # When not specified the default issue_closing_pattern as specified below will be used.
+    # issue_closing_pattern: ([Cc]lose[sd]|[Ff]ixe[sd]) +#\d+
 
     ## Default project features settings
     default_projects_features:
@@ -49,10 +68,12 @@ production: &base
       wiki: true
       wall: false
       snippets: false
+      public: false
 
   ## External issues trackers
   issues_tracker:
     # redmine:
+    #   title: "Redmine"
     #   ## If not nil, link 'Issues' on project page will be replaced with this
     #   ## Use placeholders:
     #   ##  :project_id        - GitLab project identifier
@@ -73,6 +94,7 @@ production: &base
     #   new_issue_url: "http://redmine.sample/projects/:issues_tracker_id/issues/new"
     # 
     # jira:
+    #   title: "Atlassian Jira"
     #   project_url: "http://jira.sample/issues/?jql=project=:issues_tracker_id"
     #   issues_url: "http://jira.sample/browse/:id"
     #   new_issue_url: "http://jira.sample/secure/CreateIssue.jspa"
@@ -97,6 +119,7 @@ production: &base
     method: 'ssl' # "ssl" or "plain"
     bind_dn: '_the_full_dn_of_the_user_you_will_bind_with'
     password: '_the_password_of_the_bind_user'
+    allow_username_or_email_login: true
 
   ## OmniAuth settings
   omniauth:
@@ -113,7 +136,7 @@ production: &base
     ## Auth providers
     # Uncomment the following lines and fill in the data of the auth provider you want to use
     # If your favorite auth provider is not listed you can use others:
-    # see https://github.com/gitlabhq/gitlabhq/wiki/Using-Custom-Omniauth-Providers
+    # see https://github.com/gitlabhq/gitlab-public-wiki/wiki/Working-custom-omniauth-provider-configurations
     # The 'app_id' and 'app_secret' parameters are always passed as the first two
     # arguments, followed by optional 'args' which can be either a hash or an array.
     providers:
@@ -185,6 +208,7 @@ test:
   <<: *base
   issues_tracker:
     redmine:
+      title: "Redmine"
       project_url: "http://redmine/projects/:issues_tracker_id"
       issues_url: "http://redmine/:project_id/:issues_tracker_id/:id"
       new_issue_url: "http://redmine/projects/:issues_tracker_id/issues/new"

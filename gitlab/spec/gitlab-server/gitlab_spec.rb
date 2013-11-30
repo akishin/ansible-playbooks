@@ -52,14 +52,6 @@ describe file('/home/git/repositories') do
   it { should be_mode 2770 }
 end
 
-describe command('cd /home/git/gitlab-shell; /usr/bin/git branch') do
-  it { should return_stdout /\* 1\.7\.0/ }
-end
-
-describe command('cd /home/git/gitlab; /usr/bin/git branch') do
-  it { should return_stdout /\* 6\.0\.0/ }
-end
-
 describe file('/home/git/gitlab/config/gitlab.yml') do
   it { should be_file }
   it { should be_owned_by 'git' }

@@ -1,14 +1,6 @@
 ---
 - name: uninstall git
   action: yum name=git state=removed
-  with_items:
-    - gcc
-    - make
-    - openssl-devel
-    - curl-devel
-    - zlib-devel
-    - gettext
-    - perl-ExtUtils-MakeMaker
 
 - name: install packages
   action: yum name=$item state=installed

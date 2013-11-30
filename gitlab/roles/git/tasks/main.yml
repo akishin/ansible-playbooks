@@ -1,4 +1,7 @@
 ---
+- name: uninstall git
+  action: yum name=git state=removed
+
 - name: install packages
   action: yum name=$item state=installed
   with_items:
