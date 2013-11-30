@@ -1,0 +1,30 @@
+--- 
+- name: import gpg-keys
+  command: rpm --import $item
+  with_items: gpg_keys
+  ignore_errors: True
+
+- name: install repositories
+  yum: name=$item state=installed
+  with_items: repo_rpms
+  ignore_errors: True
+
+- name: install redis packages
+  action: yum name=redis enablerepo=remi state=installed
+
+- name: copy /etc/security/limits.d/redis.conf
+  template: src=limits-redis.conf.j2 dest=/etc/security/limits.d/redis.conf owner=root
+
+- name: copy /etc/sysconfig/redis file
+  template: src=sysconfig-redis.j2 dest=/etc/sysconfig/redis owner=root
+
+- name: add a vm.overcommit_memory setting at the end of the sysctl.conf
+  sysctl: name=vm.overcommit_memory value=1 state=present reload=yes
+
+- name: insert iptables rule
+  lineinfile: dest=/etc/sysconfig/iptables state=present regexp="{{ redis_port }}"
+              insertafter="^:OUTPUT " line="-A INPUT -p tcp --dport {{ redis_port }} -j ACCEPT"
+  notify: restart iptables
+
+- name: start redis
+  action: service name=redis state=started enabled=yes

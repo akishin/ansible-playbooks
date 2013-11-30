@@ -1,0 +1,4 @@
+---
+- name: copy /etc/redis.conf file
+  template: src=redis.conf.j2 dest=/etc/redis.conf owner=root
+  notify: restart redis

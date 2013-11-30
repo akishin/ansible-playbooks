@@ -1,0 +1,7 @@
+---
+gpg_keys:
+  - http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-6
+  - http://rpms.famillecollet.com/RPM-GPG-KEY-remi
+repo_rpms:
+  - http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+  - http://rpms.famillecollet.com/enterprise/remi-release-6.rpm

@@ -1,0 +1,4 @@
+[redis-master]
+192.0.2.1
+[redis-slave]
+192.0.2.2
