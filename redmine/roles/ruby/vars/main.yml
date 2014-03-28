@@ -1,9 +1,9 @@
 ---
-ruby_ver: "2.0.0-p247"
+ruby_ver: "2.0.0-p451"
 ruby_archive: ftp://ftp.ruby-lang.org/pub/ruby/2.0/ruby-{{ ruby_ver }}.tar.gz
 download_path: /usr/local/src
 install_prefix: /usr
 configure_options: --enable-shared
-libyaml-rpm: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-0.1.3-1.el6.x86_64.rpm
-libyaml-devel-rpm: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-devel-0.1.3-1.el6.x86_64.rpm
+libyaml-rpm: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-0.1.5-1.el6.x86_64.rpm
+libyaml-devel-rpm: http://ftp.riken.jp/Linux/fedora/epel/6/x86_64/libyaml-devel-0.1.5-1.el6.x86_64.rpm
 paco-rpm: http://dl.fedoraproject.org/pub/epel/6/x86_64/paco-2.0.9-6.el6.x86_64.rpm
